@@ -1,6 +1,10 @@
 # SFWE-405-Campus-Marketplace
 SFWE 405 course project: E-commerce shopping platform (Campus Marketplace) implementing a 3-layer architecture with ORM, repositories, REST API, and business rules.
 
+**Student Name:** Samiur Rahman  
+**Course:** SFWE 405  
+**Project:** E-commerce Campus Marketplace  
+
 # Campus Marketplace – Phase 1
 
 Spring Boot backend for a campus marketplace application.
