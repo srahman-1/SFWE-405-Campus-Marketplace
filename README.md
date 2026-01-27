@@ -28,4 +28,30 @@ Spring Boot backend for a campus marketplace application.
 - Spring Data JPA
 - H2 Database
 - Maven
+- Postman (API testing)
+
+# Phase 2 – Business Layer & REST
+
+## Features (Phase 2)
+- Logic for business leveraging the service layer
+- Processing workflow for orders
+- Mock enforcement of payment (ordering is not possible without payment)
+- Place an entity and repository order.
+- REST API expansion
+- Tested with Postman
+
+ ## Business Process
+ - The user signs up
+ - The user makes a product listing
+ -  A buyer peruses merchandise
+ -  The customer places an order
+ -  Payment has been completed (mock)
+ -  The order has been recorded as paid
+   
+ ## Endpoints 
+ - POST /orders
+ - POST /orders/{id}/pay
+ - GET  /orders
+
+
 
