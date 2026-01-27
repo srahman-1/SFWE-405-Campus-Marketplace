@@ -1,7 +1,7 @@
 package edu.sfwe405.campusmarketplace.controller;
 
 import edu.sfwe405.campusmarketplace.model.UserAccount;
-import edu.sfwe405.campusmarketplace.repository.UserRepository;
+import edu.sfwe405.campusmarketplace.service.UserService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -10,21 +10,21 @@ import java.util.List;
 @RequestMapping("/users")
 public class UserController {
 
-    private final UserRepository userRepository;
+    private final UserService userService;
 
-    public UserController(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    public UserController(UserService userService) {
+        this.userService = userService;
     }
-
 
     @PostMapping
     public UserAccount createUser(@RequestBody UserAccount user) {
-        return userRepository.save(user);
+        return userService.createUser(user);
     }
 
-    // GET all users
     @GetMapping
     public List<UserAccount> getAllUsers() {
-        return userRepository.findAll();
+        return userService.getAllUsers();
     }
 }
+
+
