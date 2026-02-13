@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Orders</title>
+
+    <style>
+        body { font-family:Arial; background:#f4f6f8; text-align:center; }
+        header { background:#AB0520; color:white; padding:20px; }
+        input,button { padding:10px; margin:5px; }
+        button { background:#0C234B; color:white; border:none; cursor:pointer; }
+
+        #orderMsg, #payMsg {
+            margin-top:15px;
+            font-weight:bold;
+            font-size:18px;
+            color:green;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h2>Campus Marketplace — Orders</h2>
+</header>
+
+<h3>Create Order</h3>
+<input id="buyerId" placeholder="Buyer ID">
+<input id="productId" placeholder="Product ID">
+<button onclick="placeOrder()">Place Order</button>
+
+<div id="orderMsg"></div>
+
+<h3>Pay Order</h3>
+<input id="orderId" placeholder="Order ID">
+<button onclick="payOrder()">Pay Order</button>
+
+<div id="payMsg"></div>
+
+<script src="app.js"></script>
+
+</body>
+</html>
