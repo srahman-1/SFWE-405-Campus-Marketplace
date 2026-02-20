@@ -2,7 +2,18 @@
 
 SFWE 405 course project: E-commerce shopping platform (Campus Marketplace) implementing a layered architecture with ORM, repositories, REST API, business rules, and user interface.
 
-**Student Name:** Samiur Rahman  
+---
+
+# Team – Team Wesley
+
+- Alex Lopez
+- Camila Inda
+- Christopher Morales
+- Elend Hudson
+- Mateo Alvarez
+- Samiur Rahman
+- Wesley Nguyen
+  
 **Course:** SFWE 405  
 **Project:** E-commerce Campus Marketplace  
 
