@@ -1,6 +1,7 @@
 package edu.sfwe405.campusmarketplace.controller;
 
-import edu.sfwe405.campusmarketplace.model.UserAccount;
+import edu.sfwe405.campusmarketplace.dto.RegisterRequest;
+import edu.sfwe405.campusmarketplace.dto.RegisterResponse;
 import edu.sfwe405.campusmarketplace.service.UserService;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,14 +18,12 @@ public class UserController {
     }
 
     @PostMapping
-    public UserAccount createUser(@RequestBody UserAccount user) {
+    public RegisterResponse createUser(@RequestBody RegisterRequest user) {
         return userService.createUser(user);
     }
 
     @GetMapping
-    public List<UserAccount> getAllUsers() {
+    public List<RegisterResponse> getAllUsers() {
         return userService.getAllUsers();
     }
 }
-
-

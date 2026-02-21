@@ -1,5 +1,6 @@
 package edu.sfwe405.campusmarketplace.service;
 
+import edu.sfwe405.campusmarketplace.dto.ProductDTO;
 import edu.sfwe405.campusmarketplace.model.Product;
 import edu.sfwe405.campusmarketplace.repository.ProductRepository;
 import org.springframework.stereotype.Service;
@@ -15,7 +16,12 @@ public class ProductService {
         this.productRepository = productRepository;
     }
 
-    public Product createProduct(Product product) {
+    public Product createProduct(ProductDTO request) {
+        Product product = new Product();
+        product.setName(request.name());
+        product.setDescription(request.description());
+        product.setPrice(request.price());
+
         return productRepository.save(product);
     }
 

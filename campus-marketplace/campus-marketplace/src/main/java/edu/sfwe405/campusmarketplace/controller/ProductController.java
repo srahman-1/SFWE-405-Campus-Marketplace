@@ -1,5 +1,6 @@
 package edu.sfwe405.campusmarketplace.controller;
 
+import edu.sfwe405.campusmarketplace.dto.ProductDTO;
 import edu.sfwe405.campusmarketplace.model.Product;
 import edu.sfwe405.campusmarketplace.service.ProductService;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +18,7 @@ public class ProductController {
     }
 
     @PostMapping
-    public Product createProduct(@RequestBody Product product) {
+    public Product createProduct(@RequestBody ProductDTO product) {
         return productService.createProduct(product);
     }
 
