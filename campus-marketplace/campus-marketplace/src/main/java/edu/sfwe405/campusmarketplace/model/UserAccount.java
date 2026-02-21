@@ -17,8 +17,13 @@ public class UserAccount {
     @Column(nullable = false)
     private String password;
 
+    public enum Role {
+        CUSTOMER,
+        SELLER
+    }
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String role; // CUSTOMER or SELLER
+    private Role role;
 
     private LocalDateTime createdAt = LocalDateTime.now();
 
@@ -46,11 +51,11 @@ public class UserAccount {
         this.password = password;
     }
 
-    public String getRole() {
+    public Role getRole() {
         return role;
     }
 
-    public void setRole(String role) {
+    public void setRole(Role role) {
         this.role = role;
     }
 
