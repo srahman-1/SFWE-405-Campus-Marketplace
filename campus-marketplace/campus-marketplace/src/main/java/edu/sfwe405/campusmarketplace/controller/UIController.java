@@ -1,9 +1,11 @@
 package edu.sfwe405.campusmarketplace.controller;
 
+import edu.sfwe405.campusmarketplace.dto.RegisterRequest;
 import edu.sfwe405.campusmarketplace.model.Product;
 import edu.sfwe405.campusmarketplace.model.UserAccount;
 import edu.sfwe405.campusmarketplace.repository.ProductRepository;
 import edu.sfwe405.campusmarketplace.repository.UserRepository;
+import edu.sfwe405.campusmarketplace.service.UserService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -14,10 +16,12 @@ public class UIController {
 
     private final UserRepository userRepo;
     private final ProductRepository productRepo;
+    private final UserService userService;
 
-    public UIController(UserRepository userRepo, ProductRepository productRepo) {
+    public UIController(UserRepository userRepo, ProductRepository productRepo, UserService userService) {
         this.userRepo = userRepo;
         this.productRepo = productRepo;
+        this.userService = userService;
     }
 
     @GetMapping("/")
@@ -33,8 +37,12 @@ public class UIController {
     }
 
     @PostMapping("/users")
-    public String saveUser(UserAccount user) {
-        userRepo.save(user);
+    public String saveUser(
+        @RequestParam String email,
+        @RequestParam String password,
+        @RequestParam UserAccount.Role role
+    ) {
+        userService.createUser(new RegisterRequest(email, password, role));
         return "redirect:/ui/users";
     }
 
