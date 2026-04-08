@@ -4,10 +4,8 @@ import edu.sfwe405.campusmarketplace.dto.RegisterRequest;
 import edu.sfwe405.campusmarketplace.dto.RegisterResponse;
 import edu.sfwe405.campusmarketplace.model.UserAccount;
 import edu.sfwe405.campusmarketplace.repository.UserRepository;
-
-import org.springframework.stereotype.Service;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -15,18 +13,21 @@ import java.util.List;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public RegisterResponse createUser(RegisterRequest request) {
+        String cleanEmail = request.email().trim().toLowerCase();
+        if (userRepository.findByEmail(cleanEmail).isPresent()) {
+            throw new IllegalArgumentException("Email is already registered");
+        }
 
-        // Use a DTO so we don't need to send id or createdAt in the request
-        // Could use access = JSONProperty stuff but defining that in the model mixes concerns
         UserAccount user = new UserAccount();
-        user.setEmail(request.email());
+        user.setEmail(cleanEmail);
         user.setRole(request.role());
 
         String hashed = passwordEncoder.encode(request.password());
@@ -37,7 +38,6 @@ public class UserService {
     }
 
     public List<RegisterResponse> getAllUsers() {
-        // Use java stream
         return userRepository.findAll()
             .stream()
             .map(user -> new RegisterResponse(
@@ -47,5 +47,21 @@ public class UserService {
                 user.getCreatedAt()
             ))
             .toList();
+    }
+
+    public UserAccount getByEmailOrThrow(String email) {
+        String cleanEmail = email.trim().toLowerCase();
+        return userRepository.findByEmail(cleanEmail)
+            .orElseThrow(() -> new IllegalArgumentException("Invalid credentials"));
+    }
+
+    public void updatePassword(String email, String newPassword) {
+        UserAccount user = getByEmailOrThrow(email);
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
+
+    public boolean matchesPassword(String rawPassword, String encodedPassword) {
+        return passwordEncoder.matches(rawPassword, encodedPassword);
     }
 }
