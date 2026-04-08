@@ -3,6 +3,7 @@ package edu.sfwe405.campusmarketplace.controller;
 import edu.sfwe405.campusmarketplace.dto.ProductDTO;
 import edu.sfwe405.campusmarketplace.model.Product;
 import edu.sfwe405.campusmarketplace.service.ProductService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,7 +19,7 @@ public class ProductController {
     }
 
     @PostMapping
-    public Product createProduct(@RequestBody ProductDTO product) {
+    public Product createProduct(@Valid @RequestBody ProductDTO product) {
         return productService.createProduct(product);
     }
 

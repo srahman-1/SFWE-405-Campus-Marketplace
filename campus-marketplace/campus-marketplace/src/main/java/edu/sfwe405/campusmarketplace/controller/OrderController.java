@@ -32,19 +32,14 @@ public class OrderController {
     // CREATE ORDER
     @PostMapping
     public Order createOrder(@RequestBody Map<String, Long> body) {
-
         Long buyerId = body.get("buyerId");
         Long productId = body.get("productId");
 
-        if (buyerId == null || productId == null) {
-            throw new RuntimeException("buyerId or productId missing");
-        }
-
         UserAccount buyer = userRepository.findById(buyerId)
-                .orElseThrow(() -> new RuntimeException("Buyer not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Buyer not found"));
 
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Product not found"));
 
         Order order = new Order();
         order.setBuyer(buyer);
@@ -65,10 +60,10 @@ public class OrderController {
     public Order payOrder(@PathVariable Long id) {
 
         Order order = orderRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Order not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Order not found"));
 
         if (order.isPaid()) {
-            throw new RuntimeException("Order already paid");
+            throw new IllegalArgumentException("Order already paid");
         }
 
         order.setPaid(true);
