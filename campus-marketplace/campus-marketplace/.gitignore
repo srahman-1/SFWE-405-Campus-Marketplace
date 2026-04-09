@@ -1,0 +1,6 @@
+target
+.direnv
+.vscode
+
+.envrc
+*.nix

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>Campus Marketplace — Users</h2>
+
+<form action="/ui/users" method="post">
+    Email: <input name="email"><br>
+    Password: <input name="passwordHash"><br>
+    Role: <input name="role"><br>
+    <button type="submit">Create User</button>
+</form>
+
+<hr>
+
+<ul>
+    <li th:each="u : ${users}">
+        [[${u.id}]] - [[${u.email}]] - [[${u.role}]]
+    </li>
+</ul>
+
+<br><br>
+
+<a href="/ui/" style="
+    display:inline-block;
+    background:#444;
+    color:white;
+    padding:14px 22px;
+    border-radius:10px;
+    font-weight:bold;
+    text-decoration:none;
+    font-size:16px;">
+    ⬅ Back to Home
+</a>
+
+</body>
+</html>
