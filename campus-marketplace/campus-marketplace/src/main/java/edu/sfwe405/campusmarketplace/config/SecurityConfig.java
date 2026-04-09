@@ -31,6 +31,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/users").hasRole("SELLER")
                 .requestMatchers(HttpMethod.POST, "/users").permitAll()
                 .requestMatchers(HttpMethod.POST, "/products").hasRole("SELLER")
+                    .requestMatchers(HttpMethod.DELETE, "/users/me").authenticated()
                 .requestMatchers("/orders/**", "/payments/**").authenticated()
                 .anyRequest().permitAll()
             );

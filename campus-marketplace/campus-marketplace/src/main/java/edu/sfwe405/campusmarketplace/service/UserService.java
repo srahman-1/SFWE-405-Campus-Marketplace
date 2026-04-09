@@ -64,4 +64,9 @@ public class UserService {
     public boolean matchesPassword(String rawPassword, String encodedPassword) {
         return passwordEncoder.matches(rawPassword, encodedPassword);
     }
+
+    public void deleteAccount(String email) {
+        UserAccount user = getByEmailOrThrow(email);
+        userRepository.delete(user);
+    }
 }
