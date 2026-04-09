@@ -94,10 +94,18 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- Gatling stress testing -->
+        <dependency>
+            <groupId>io.gatling.highcharts</groupId>
+            <artifactId>gatling-charts-highcharts</artifactId>
+            <version>3.11.5</version>
+            <scope>test</scope>
+        </dependency>
 
     </dependencies>
 
     <build>
+        <testSourceDirectory>src/test/scala</testSourceDirectory>
         <plugins>
 
             <plugin>
@@ -113,7 +121,35 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
+        <!-- Scala compiler (needed for Gatling simulations) -->
+            <plugin>
+                <groupId>net.alchim31.maven</groupId>
+                <artifactId>scala-maven-plugin</artifactId>
+                <version>4.9.2</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>testCompile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <scalaVersion>2.13.14</scalaVersion>
+                </configuration>
+            </plugin>
 
+            <!-- Gatling Maven plugin -->
+            <plugin>
+                <groupId>io.gatling</groupId>
+                <artifactId>gatling-maven-plugin</artifactId>
+                <version>4.9.6</version>
+                <configuration>
+                    <!-- Run all simulations under src/test/scala -->
+                    <simulationsFolder>src/test/scala</simulationsFolder>
+                    <!-- Write HTML reports here -->
+                    <resultsFolder>target/gatling</resultsFolder>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
