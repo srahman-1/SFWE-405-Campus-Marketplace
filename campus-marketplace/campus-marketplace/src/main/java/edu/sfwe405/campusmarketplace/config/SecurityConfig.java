@@ -3,6 +3,7 @@ package edu.sfwe405.campusmarketplace.config;
 import edu.sfwe405.campusmarketplace.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -14,7 +15,7 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+    public SecurityConfig(@Lazy JwtAuthenticationFilter jwtAuthenticationFilter) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
 
@@ -32,6 +33,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/users").permitAll()
                 .requestMatchers(HttpMethod.POST, "/products").hasRole("SELLER")
                     .requestMatchers(HttpMethod.DELETE, "/users/me").authenticated()
+                .requestMatchers("/cart/**").authenticated()
                 .requestMatchers("/orders/**", "/payments/**").authenticated()
                 .anyRequest().permitAll()
             );
