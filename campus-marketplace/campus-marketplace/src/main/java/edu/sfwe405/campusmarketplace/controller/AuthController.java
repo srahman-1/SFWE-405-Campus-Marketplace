@@ -11,6 +11,7 @@ import edu.sfwe405.campusmarketplace.dto.ResetPasswordResponse;
 import edu.sfwe405.campusmarketplace.service.AuthService;
 import edu.sfwe405.campusmarketplace.service.PasswordResetService;
 import edu.sfwe405.campusmarketplace.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,10 +33,8 @@ public class AuthController {
         this.passwordResetService = passwordResetService;
     }
 
-    // ── existing endpoints (unchanged) ────────────────────────────────────
-
     @PostMapping("/register")
-    public RegisterResponse register(@RequestBody RegisterRequest request) {
+    public RegisterResponse register(@Valid @RequestBody RegisterRequest request) {
         return userService.createUser(request);
     }
 

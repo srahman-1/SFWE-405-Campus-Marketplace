@@ -7,5 +7,5 @@ public record CartCheckoutResponse(
     String message,
     double total,
     List<Long> orderIds,
-    List<Number> unavailableItems
+    List<Long> unavailableItems
 ) {}
