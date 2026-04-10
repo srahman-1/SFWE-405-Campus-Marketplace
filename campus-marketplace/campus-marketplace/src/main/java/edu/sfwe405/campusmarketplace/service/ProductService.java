@@ -21,6 +21,7 @@ public class ProductService {
         product.setName(request.name());
         product.setDescription(request.description());
         product.setPrice(request.price());
+        product.setStock(request.stock() == null ? 1 : request.stock());
 
         return productRepository.save(product);
     }

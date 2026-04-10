@@ -18,6 +18,9 @@ public class Product {
 
     private double price;
 
+    @Column(nullable = false)
+    private int stock = 0;
+
     private LocalDateTime createdAt = LocalDateTime.now();
 
     public Product() {}
@@ -48,6 +51,14 @@ public class Product {
 
     public void setPrice(double price) {
         this.price = price;
+    }
+
+    public int getStock() {
+        return stock;
+    }
+
+    public void setStock(int stock) {
+        this.stock = stock;
     }
 
     public LocalDateTime getCreatedAt() {
