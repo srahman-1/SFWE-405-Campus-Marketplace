@@ -1,13 +1,20 @@
 package edu.sfwe405.campusmarketplace.service;
 
+import edu.sfwe405.campusmarketplace.dto.ForgotPasswordRequest;
+import edu.sfwe405.campusmarketplace.dto.ForgotPasswordResponse;
 import edu.sfwe405.campusmarketplace.dto.RegisterRequest;
 import edu.sfwe405.campusmarketplace.dto.RegisterResponse;
+import edu.sfwe405.campusmarketplace.dto.ResetPasswordRequest;
+import edu.sfwe405.campusmarketplace.dto.ResetPasswordResponse;
 import edu.sfwe405.campusmarketplace.model.UserAccount;
 import edu.sfwe405.campusmarketplace.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class UserService {
@@ -68,5 +75,27 @@ public class UserService {
     public void deleteAccount(String email) {
         UserAccount user = getByEmailOrThrow(email);
         userRepository.delete(user);
+    }
+
+    private final Map<String, String> tokenStore = new ConcurrentHashMap<>();
+
+    public ForgotPasswordResponse requestReset(ForgotPasswordRequest request) {
+        String cleanEmail = request.email().trim().toLowerCase();
+        getByEmailOrThrow(cleanEmail);
+        String token = UUID.randomUUID().toString();
+        tokenStore.put(token, cleanEmail);
+        return new ForgotPasswordResponse("Password reset token generated.", token);
+    }
+
+    public ResetPasswordResponse resetPassword(ResetPasswordRequest request) {
+        String email = tokenStore.get(request.resetToken());
+
+        if (email == null) {
+            throw new IllegalArgumentException("Invalid or expired reset token.");
+        }
+
+        updatePassword(email, request.newPassword());
+        tokenStore.remove(request.resetToken());
+        return new ResetPasswordResponse("Password has been reset successfully.");
     }
 }

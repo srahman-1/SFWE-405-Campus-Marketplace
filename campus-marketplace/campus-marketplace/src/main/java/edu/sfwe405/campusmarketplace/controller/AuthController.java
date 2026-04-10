@@ -9,7 +9,6 @@ import edu.sfwe405.campusmarketplace.dto.RegisterResponse;
 import edu.sfwe405.campusmarketplace.dto.ResetPasswordRequest;
 import edu.sfwe405.campusmarketplace.dto.ResetPasswordResponse;
 import edu.sfwe405.campusmarketplace.service.AuthService;
-import edu.sfwe405.campusmarketplace.service.PasswordResetService;
 import edu.sfwe405.campusmarketplace.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,14 +22,11 @@ public class AuthController {
 
     private final AuthService authService;
     private final UserService userService;
-    private final PasswordResetService passwordResetService;
 
     public AuthController(AuthService authService,
-                          UserService userService,
-                          PasswordResetService passwordResetService) {
+                          UserService userService) {
         this.authService = authService;
         this.userService = userService;
-        this.passwordResetService = passwordResetService;
     }
 
     @PostMapping("/register")
@@ -55,7 +51,7 @@ public class AuthController {
      */
     @PostMapping("/forgot-password")
     public ForgotPasswordResponse forgotPassword(@RequestBody ForgotPasswordRequest request) {
-        return passwordResetService.requestReset(request);
+        return userService.requestReset(request);
     }
 
     /**
@@ -66,6 +62,6 @@ public class AuthController {
      */
     @PostMapping("/reset-password")
     public ResetPasswordResponse resetPassword(@RequestBody ResetPasswordRequest request) {
-        return passwordResetService.resetPassword(request);
+        return userService.resetPassword(request);
     }
 }
