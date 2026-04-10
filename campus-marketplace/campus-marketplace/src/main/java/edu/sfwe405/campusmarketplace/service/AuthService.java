@@ -31,7 +31,6 @@ public class AuthService {
 
         return new LoginResponse(
             token,
-            "Bearer",
             jwtService.getTokenExpirationInSeconds(),
             user.getEmail(),
             user.getRole(),
