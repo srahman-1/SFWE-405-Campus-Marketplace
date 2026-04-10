@@ -12,6 +12,8 @@ import edu.sfwe405.campusmarketplace.model.UserAccount;
 import edu.sfwe405.campusmarketplace.repository.CartItemRepository;
 import edu.sfwe405.campusmarketplace.repository.ProductRepository;
 import edu.sfwe405.campusmarketplace.repository.UserRepository;
+import jakarta.transaction.Transactional;
+
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -80,6 +82,7 @@ public class CartService {
         return viewCart(buyerId);
     }
 
+    @Transactional
     public CartCheckoutResponse checkout(Long buyerId, CartCheckoutRequest request) {
         UserAccount buyer = getBuyerOrThrow(buyerId);
         List<CartItem> cartItems = cartItemRepository.findByBuyerId(buyerId);

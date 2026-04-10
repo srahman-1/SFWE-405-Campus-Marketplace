@@ -34,7 +34,8 @@ public class AuthService {
             "Bearer",
             jwtService.getTokenExpirationInSeconds(),
             user.getEmail(),
-            user.getRole()
+            user.getRole(),
+            user.getId()
         );
     }
 
