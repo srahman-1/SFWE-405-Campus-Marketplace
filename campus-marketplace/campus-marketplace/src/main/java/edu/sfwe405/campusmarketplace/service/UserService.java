@@ -1,6 +1,7 @@
 package edu.sfwe405.campusmarketplace.service;
 
 import edu.sfwe405.campusmarketplace.dto.ForgotPasswordRequest;
+import edu.sfwe405.campusmarketplace.dto.UserAccountDetail;
 import edu.sfwe405.campusmarketplace.dto.ForgotPasswordResponse;
 import edu.sfwe405.campusmarketplace.dto.RegisterRequest;
 import edu.sfwe405.campusmarketplace.dto.RegisterResponse;
@@ -138,5 +139,11 @@ public class UserService {
 
     public void deleteUserById(Long userId) {
         userRepository.deleteById(userId);
+    }
+    public List<UserAccountDetail> getUsersByRole(String role) {
+        return userRepository.findAll().stream()
+                .filter(u -> role.equalsIgnoreCase(u.getRole()))
+                .map(u -> new UserAccountDetail(u.getId(), u.getEmail(), u.getPassword()))
+                .collect(Collectors.toList());
     }
 }
