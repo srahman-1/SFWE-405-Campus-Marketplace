@@ -1,3 +1,37 @@
+let userAccountsModal = null
+
+async function openUserAccountsModal() {
+    if (!userAccountsModal) {
+        userAccountsModal = new bootstrap.Modal(document.getElementById('userAccountsModal'))
+    }
+    userAccountsModal.show()
+
+    const tbody = document.getElementById('userAccountsTableBody')
+    tbody.innerHTML = '<tr><td colspan="3" class="text-center text-muted">Loading...</td></tr>'
+
+    try {
+        const users = await request('/users/role/user', {
+            method: 'GET',
+            headers: authHeaders()
+        })
+
+        if (!users || users.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="3" class="text-center text-muted">No user accounts found</td></tr>'
+            return
+        }
+
+        tbody.innerHTML = users.map(u => `
+            <tr>
+                <td>${u.id}</td>
+                <td>${u.email}</td>
+                <td><code style="word-break:break-all;font-size:0.8em">${u.password}</code></td>
+            </tr>
+        `).join('')
+    } catch (error) {
+        tbody.innerHTML = `<tr><td colspan="3" class="text-center text-danger">Failed to load: ${error.message}</td></tr>`
+    }
+}
+
 let currentEditUserId = null
 let editUserModal = null
 
