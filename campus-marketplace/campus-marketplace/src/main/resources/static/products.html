@@ -2,54 +2,69 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Products</title>
-
-    <style>
-        body { font-family:Arial; background:#f4f6f8; text-align:center; }
-        header { background:#AB0520; color:white; padding:20px; }
-        input,button { padding:10px; margin:5px; }
-        button { background:#0C234B; color:white; border:none; }
-
-
-        .backbtn {
-            background:#444;
-            color:white;
-            border:none;
-            padding:10px 16px;
-            border-radius:8px;
-            font-weight:bold;
-            margin-top:20px;
-            cursor:pointer;
-        }
-        .backbtn:hover {
-            background:#222;
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campus Marketplace | Your Listings</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 
-<body>
+<body class="bg-light">
+<nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom">
+    <div class="container">
+        <a class="navbar-brand" href="index.html">Campus Marketplace</a>
+        <div class="d-flex gap-2">
+            <a class="btn btn-outline-primary btn-sm" data-auth="signed-out" href="login.html">Log In</a>
+            <a class="btn btn-primary btn-sm" data-auth="signed-out" href="signup.html">Sign Up</a>
+            <a class="btn btn-outline-primary btn-sm position-relative d-none" data-auth="signed-in" href="/cart.html">
+                Cart
+                <span id="cartCount" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none">0</span>
+            </a>
+            <a class="btn btn-outline-primary btn-sm d-none" data-auth="signed-in" href="/orders.html">Orders & Sales</a>
+            <button class="btn btn-outline-secondary btn-sm d-none" data-auth="signed-in" data-action="logout" type="button">Log Out</button>
+        </div>
+    </div>
+</nav>
 
-<header>
-    <h2>Campus Marketplace — Products</h2>
-</header>
+<main class="container py-5">
+    <h1 class="h3 mb-2">Your Listings</h1>
 
-<input id="name" placeholder="Name">
-<input id="description" placeholder="Description">
-<input id="price" type="number" step="0.01" placeholder="Price">
+    <div class="row g-4 mb-4">
+        <div class="col-12 col-lg-5">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h2 class="h5 mb-3">New Listing</h2>
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Name</label>
+                        <input id="name" class="form-control" placeholder="Textbook">
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <input id="description" class="form-control" placeholder="Condition, edition, notes">
+                    </div>
+                    <div class="mb-3">
+                        <label for="price" class="form-label">Price</label>
+                        <input id="price" class="form-control" type="number" step="0.01" min="0.01" placeholder="25.00">
+                    </div>
+                    <div class="mb-4">
+                        <label for="stock" class="form-label">Quantity available</label>
+                        <input id="stock" class="form-control" type="number" min="0" step="1" placeholder="1">
+                    </div>
+                    <button class="btn btn-primary w-100" type="button" onclick="createProduct()">Add Product</button>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-lg-7">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="h5 mb-0">Your Current Listings</h2>
+                <button class="btn btn-outline-secondary btn-sm" type="button" onclick="loadMyListings()">Refresh</button>
+            </div>
+            <div id="myListingsStatus" class="mb-3 text-muted">Loading your listings...</div>
+            <div id="noMyListings" class="alert alert-light border d-none">You have not posted any listings yet.</div>
+            <div id="myListingsGrid" class="row g-4"></div>
+        </div>
+    </div>
+</main>
 
-<br>
-
-<button onclick="createProduct()">Add Product</button>
-<button onclick="loadProducts()">Load Products</button>
-
-<ul id="products"></ul>
-
-<script src="app.js"></script>
-
-<br><br>
-<button class="backbtn" onclick="window.location.href='index.html'">
-    ⬅ Home
-</button>
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>

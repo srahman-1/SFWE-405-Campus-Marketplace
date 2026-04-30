@@ -33,6 +33,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/users").permitAll()
                 .requestMatchers(HttpMethod.GET, "/users").authenticated()
                 .requestMatchers(HttpMethod.POST, "/products").authenticated()
+                .requestMatchers(HttpMethod.GET, "/products/me").authenticated()
                 .requestMatchers(HttpMethod.DELETE, "/users/me").authenticated()
                 .requestMatchers("/cart/**").authenticated()
                 .requestMatchers("/orders/**", "/payments/**").authenticated()

@@ -1,8 +1,12 @@
 let products = []
+let myProducts = []
 let cartItems = []
 let listingSelections = {}
 let listingDetail = null
 let listingDetailQuantity = 1
+let editingProductId = null
+let deletingProductId = null
+
 const onListingsPage =
   window.location.pathname.endsWith('/listings.html') || window.location.pathname.endsWith('listings.html')
 const onOrdersPage =
@@ -120,6 +124,15 @@ function listingQuantity(productId, stock) {
   return determineCartQtyChange(listingSelections[productId], stock) || 1
 }
 
+function currentUserId() {
+  return localStorage.getItem('campus_marketplace_user_id')
+}
+
+function isOwnedListing(item) {
+  const userId = currentUserId()
+  return Boolean(userId) && String(item.ownerId || '') === String(userId)
+}
+
 function updateNav() {
   const signedIn = Boolean(localStorage.getItem('campus_marketplace_token'))
 
@@ -170,7 +183,6 @@ function updateCartCount() {
 function logout() {
   localStorage.removeItem('campus_marketplace_token')
   localStorage.removeItem('campus_marketplace_email')
-  localStorage.removeItem('campus_marketplace_role')
   localStorage.removeItem('campus_marketplace_user_id')
   window.location.href = 'index.html'
 }
@@ -196,7 +208,7 @@ async function signUp(event) {
   try {
     const user = await request('/auth/register', {
       method: 'POST',
-      body: JSON.stringify({ email, password, role: 'CUSTOMER' }),
+      body: JSON.stringify({ email, password }),
     })
 
     showAlert('signupAlert', `Account created for ${user.email}.`, 'success')
@@ -233,7 +245,6 @@ async function signIn(event) {
 
     localStorage.setItem('campus_marketplace_token', data.token)
     localStorage.setItem('campus_marketplace_email', data.email)
-    localStorage.setItem('campus_marketplace_role', data.role)
     localStorage.setItem('campus_marketplace_user_id', data.id)
     showAlert('loginAlert', 'Logged in. Redirecting...', 'success')
 
@@ -265,6 +276,7 @@ function renderProducts(items) {
   grid.innerHTML = items
     .map(item => {
       const available = Number(item.stock || 0) > 0
+      const mine = isOwnedListing(item)
       const quantity = listingQuantity(item.id, item.stock)
       const price = Number(item.price || 0).toFixed(2)
       const description = item.description || 'Campus listing'
@@ -276,7 +288,10 @@ function renderProducts(items) {
               <div class="d-flex justify-content-between gap-3">
                 <div>
                   <div class="text-muted small">Listing #${item.id}</div>
-                  <h2 class="h5 mb-1">${item.name}</h2>
+                  <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <h2 class="h5 mb-1">${item.name}</h2>
+                    ${mine ? '<span class="badge text-bg-info">Yours</span>' : ''}
+                  </div>
                 </div>
                 <span class="badge ${available ? 'text-bg-success' : 'text-bg-secondary'}">
                   ${available ? `${item.stock} available` : 'Sold out'}
@@ -287,6 +302,16 @@ function renderProducts(items) {
                 <strong>$${price}</strong>
                 <a class="btn btn-outline-primary btn-sm" href="listing.html?id=${item.id}">View item</a>
               </div>
+              ${
+                mine
+                  ? `
+                <div class="d-flex gap-2 justify-content-end flex-wrap mt-3">
+                  <button class="btn btn-outline-secondary btn-sm" type="button" data-edit-product="${item.id}">Edit</button>
+                  <button class="btn btn-outline-danger btn-sm" type="button" data-delete-product="${item.id}">Delete</button>
+                </div>
+              `
+                  : ''
+              }
               ${
                 onListingsPage && signedIn
                   ? `
@@ -309,6 +334,123 @@ function renderProducts(items) {
       `
     })
     .join('')
+}
+
+function renderMyListings(items) {
+  const grid = document.getElementById('myListingsGrid')
+  const empty = document.getElementById('noMyListings')
+  if (!grid) return
+
+  if (!items.length) {
+    grid.innerHTML = ''
+    if (empty) empty.classList.remove('d-none')
+    return
+  }
+
+  if (empty) empty.classList.add('d-none')
+
+  grid.innerHTML = items
+    .map(item => {
+      const available = Number(item.stock || 0) > 0
+      const mine = isOwnedListing(item)
+      const price = Number(item.price || 0).toFixed(2)
+      const description = item.description || 'Campus listing'
+
+      return `
+        <div class="col-12">
+          <div class="card h-100 shadow-sm">
+            <div class="card-body d-flex flex-column flex-md-row justify-content-between gap-3">
+              <div>
+                <div class="text-muted small">Listing #${item.id}</div>
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                  <h3 class="h5 mb-1">${item.name}</h3>
+                  ${mine ? '<span class="badge text-bg-info">Yours</span>' : ''}
+                </div>
+                <p class="text-muted mb-0">${description}</p>
+              </div>
+              <div class="text-md-end">
+                <div class="fw-semibold">$${price}</div>
+                <span class="badge ${available ? 'text-bg-success' : 'text-bg-secondary'}">
+                  ${available ? `${item.stock} available` : 'Sold out'}
+                </span>
+              </div>
+            </div>
+            ${
+              mine
+                ? `
+              <div class="card-footer bg-white border-0 pt-0">
+                <div class="d-flex gap-2 justify-content-end flex-wrap">
+                  <button class="btn btn-outline-secondary btn-sm" type="button" data-edit-product="${item.id}">Edit</button>
+                  <button class="btn btn-outline-danger btn-sm" type="button" data-delete-product="${item.id}">Delete</button>
+                </div>
+              </div>
+            `
+                : ''
+            }
+          </div>
+        </div>
+      `
+    })
+    .join('')
+
+  // Inject modals if not already present
+  if (!document.getElementById('editModal')) {
+    document.body.insertAdjacentHTML(
+      'beforeend',
+      `
+      <div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Edit Listing</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+              <div class="mb-3">
+                <label class="form-label">Name</label>
+                <input id="editName" class="form-control">
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Description</label>
+                <input id="editDescription" class="form-control">
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Price</label>
+                <input id="editPrice" class="form-control" type="number" step="0.01" min="0.01">
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Quantity available</label>
+                <input id="editStock" class="form-control" type="number" min="0" step="1">
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button type="button" class="btn btn-primary" id="editModalSave">Save changes</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Delete Listing</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+              Delete <strong id="deleteModalName"></strong>? This cannot be undone.
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button type="button" class="btn btn-danger" id="deleteModalConfirm">Delete</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `
+    )
+  }
 }
 
 function filterProducts() {
@@ -337,6 +479,162 @@ async function loadProducts() {
     const grid = document.getElementById('listingsGrid')
     if (grid) {
       grid.innerHTML = '<div class="col-12"><div class="alert alert-danger mb-0">Could not load listings.</div></div>'
+    }
+  }
+}
+
+async function loadMyListings() {
+  const status = document.getElementById('myListingsStatus')
+  const grid = document.getElementById('myListingsGrid')
+  if (!grid) return
+
+  const token = localStorage.getItem('campus_marketplace_token')
+  if (!token) {
+    grid.innerHTML = `
+      <div class="col-12">
+        <div class="alert alert-info mb-0">
+          Please <a href="login.html" class="alert-link">log in</a> to view your listings.
+        </div>
+      </div>
+    `
+    if (status) status.textContent = 'Sign in to manage your listings.'
+    return
+  }
+
+  if (status) status.textContent = 'Loading your listings...'
+
+  try {
+    const items = await request('/products/me', { headers: authHeaders() })
+    myProducts = items
+    renderMyListings(items)
+
+    if (status) {
+      status.textContent = `${items.length} listing${items.length === 1 ? '' : 's'} posted`
+    }
+  } catch (error) {
+    if (status) status.textContent = error.message
+    grid.innerHTML = `
+      <div class="col-12">
+        <div class="alert alert-danger mb-0">Could not load your listings.</div>
+      </div>
+    `
+  }
+}
+
+async function createProduct(event) {
+  event?.preventDefault?.()
+
+  const token = localStorage.getItem('campus_marketplace_token')
+  if (!token) {
+    window.location.href = 'login.html'
+    return
+  }
+
+  const name = document.getElementById('name')?.value.trim() || ''
+  const description = document.getElementById('description')?.value.trim() || ''
+  const price = Number(document.getElementById('price')?.value || 0)
+  const stockField = document.getElementById('stock')
+  const stockValue = stockField?.value
+  const stock = stockValue === '' || stockValue == null ? undefined : Number(stockValue)
+
+  if (!name || !Number.isFinite(price) || price <= 0) {
+    showToast('Enter a name and a valid price.', 'warning')
+    return
+  }
+
+  try {
+    await request('/products', {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({
+        name,
+        description,
+        price,
+        stock,
+      }),
+    })
+
+    showToast('Listing created.', 'success')
+
+    if (stockField) stockField.value = ''
+    if (document.getElementById('name')) document.getElementById('name').value = ''
+    if (document.getElementById('description')) document.getElementById('description').value = ''
+    if (document.getElementById('price')) document.getElementById('price').value = ''
+
+    if (document.getElementById('myListingsGrid')) {
+      loadMyListings()
+    }
+    if (document.getElementById('listingsGrid')) {
+      loadProducts()
+    }
+  } catch (error) {
+    showToast(error.message, 'danger')
+  }
+}
+
+async function editProduct(productId) {
+  const item =
+    myProducts.find(p => String(p.id) === String(productId)) || products.find(p => String(p.id) === String(productId))
+  if (!item) {
+    showToast('Listing not found.', 'danger')
+    return
+  }
+
+  document.getElementById('editName').value = item.name || ''
+  document.getElementById('editDescription').value = item.description || ''
+  document.getElementById('editPrice').value = item.price ?? ''
+  document.getElementById('editStock').value = item.stock ?? 0
+
+  const modalEl = document.getElementById('editModal')
+  const modal = new bootstrap.Modal(modalEl)
+  modal.show()
+
+  modalEl.querySelector('#editModalSave').onclick = async () => {
+    const name = document.getElementById('editName').value.trim()
+    const description = document.getElementById('editDescription').value.trim()
+    const price = Number(document.getElementById('editPrice').value)
+    const stock = Number(document.getElementById('editStock').value)
+
+    if (!name || !Number.isFinite(price) || price <= 0 || !Number.isInteger(stock) || stock < 0) {
+      showToast('Please enter a valid name, price, and stock.', 'warning')
+      return
+    }
+
+    try {
+      await request(`/products/${productId}`, {
+        method: 'PUT',
+        headers: authHeaders(),
+        body: JSON.stringify({ name, description, price, stock }),
+      })
+      modal.hide()
+      showToast('Listing updated.', 'success')
+      loadProducts()
+      loadMyListings()
+    } catch (error) {
+      showToast(error.message, 'danger')
+    }
+  }
+}
+
+async function deleteProduct(productId) {
+  const item =
+    myProducts.find(p => String(p.id) === String(productId)) || products.find(p => String(p.id) === String(productId))
+
+  document.getElementById('deleteModalName').textContent = item?.name || `#${productId}`
+
+  const modalEl = document.getElementById('deleteModal')
+  const modal = new bootstrap.Modal(modalEl)
+  modal.show()
+
+  modalEl.querySelector('#deleteModalConfirm').onclick = async () => {
+    try {
+      await request(`/products/${productId}`, { method: 'DELETE', headers: authHeaders() })
+      modal.hide()
+      showToast('Listing deleted.', 'success')
+      loadProducts()
+      loadMyListings()
+    } catch (error) {
+      showToast(error.message, 'danger')
     }
   }
 }
@@ -650,7 +948,8 @@ async function loadOrders() {
     container.innerHTML = `
       <div class="row g-3">
         ${orders
-          .map(order => `
+          .map(
+            order => `
             <div class="col-12">
               <div class="card shadow-sm">
                 <div class="card-body">
@@ -660,8 +959,8 @@ async function loadOrders() {
                       <h2 class="h5 mb-1">${order.productName}</h2>
                       <div class="text-muted small">Placed ${formatDateTime(order.createdAt)}</div>
                     </div>
-                    <span class="badge ${order.paid ? 'text-bg-success' : 'text-bg-secondary'}">
-                      ${order.paid ? 'Paid' : 'Pending'}
+                    <span class="badge ${order.transactionType === 'SALE' ? 'text-bg-primary' : 'text-bg-success'}">
+                      ${order.transactionType === 'SALE' ? 'Sale' : 'Purchase'}
                     </span>
                   </div>
                   <hr>
@@ -671,7 +970,7 @@ async function loadOrders() {
                       <div class="fw-semibold">#${order.productId}</div>
                     </div>
                     <div class="col-12 col-md-3">
-                      <div class="text-muted">Buyer</div>
+                      <div class="text-muted">${order.transactionType === 'SALE' ? 'Sold to' : 'Buyer'}</div>
                       <div class="fw-semibold">${order.buyerEmail || 'Unknown buyer'}</div>
                     </div>
                     <div class="col-12 col-md-3">
@@ -686,7 +985,8 @@ async function loadOrders() {
                 </div>
               </div>
             </div>
-          `)
+          `
+          )
           .join('')}
       </div>
     `
@@ -708,6 +1008,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const addButton = event.target.closest('[data-add-to-cart]')
     if (addButton) {
       addToCart(addButton.dataset.addToCart, addButton.dataset.quantity, addButton.dataset.stock)
+      return
+    }
+
+    const editButton = event.target.closest('[data-edit-product]')
+    if (editButton) {
+      editProduct(editButton.dataset.editProduct)
+      return
+    }
+
+    const deleteButton = event.target.closest('[data-delete-product]')
+    if (deleteButton) {
+      deleteProduct(deleteButton.dataset.deleteProduct)
       return
     }
 
@@ -759,6 +1071,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (document.getElementById('cartContent')) {
     loadCart().then(updateCartCount)
+  }
+
+  if (document.getElementById('myListingsGrid')) {
+    loadMyListings()
   }
 
   if (onOrdersPage) {
