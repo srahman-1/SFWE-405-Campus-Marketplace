@@ -1,72 +1,50 @@
 package edu.sfwe405.campusmarketplace.controller;
 
+import edu.sfwe405.campusmarketplace.dto.OrderHistoryResponse;
 import edu.sfwe405.campusmarketplace.model.Order;
-import edu.sfwe405.campusmarketplace.model.Product;
 import edu.sfwe405.campusmarketplace.model.UserAccount;
 
 import edu.sfwe405.campusmarketplace.repository.OrderRepository;
-import edu.sfwe405.campusmarketplace.repository.ProductRepository;
-import edu.sfwe405.campusmarketplace.repository.UserRepository;
 
+import edu.sfwe405.campusmarketplace.service.UserService;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/orders")
 public class OrderController {
 
     private final OrderRepository orderRepository;
-    private final UserRepository userRepository;
-    private final ProductRepository productRepository;
+    private final UserService userService;
 
-    public OrderController(OrderRepository orderRepository,
-                           UserRepository userRepository,
-                           ProductRepository productRepository) {
+    public OrderController(OrderRepository orderRepository, UserService userService) {
         this.orderRepository = orderRepository;
-        this.userRepository = userRepository;
-        this.productRepository = productRepository;
+        this.userService = userService;
     }
 
-    // CREATE ORDER
-    @PostMapping
-    public Order createOrder(@RequestBody Map<String, Long> body) {
-        Long buyerId = body.get("buyerId");
-        Long productId = body.get("productId");
-
-        UserAccount buyer = userRepository.findById(buyerId)
-                .orElseThrow(() -> new IllegalArgumentException("Buyer not found"));
-
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new IllegalArgumentException("Product not found"));
-
-        Order order = new Order();
-        order.setBuyer(buyer);
-        order.setProduct(product);
-        order.setPaid(false);
-
-        return orderRepository.save(order);
+    // GET SIGNED-IN USER ORDERS
+    @GetMapping("/me")
+    public List<OrderHistoryResponse> getMyOrders(Authentication authentication) {
+        UserAccount user = userService.getByEmailOrThrow(authentication.getName());
+        return orderRepository.findByBuyer_IdAndPaidTrueOrderByCreatedAtDesc(user.getId())
+            .stream()
+            .map(this::toHistoryResponse)
+            .toList();
     }
 
-    // GET ORDERS
-    @GetMapping
-    public List<Order> getAllOrders() {
-        return orderRepository.findAll();
-    }
-
-    // PAY ORDER
-    @PostMapping("/{id}/pay")
-    public Order payOrder(@PathVariable Long id) {
-
-        Order order = orderRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Order not found"));
-
-        if (order.isPaid()) {
-            throw new IllegalArgumentException("Order already paid");
-        }
-
-        order.setPaid(true);
-        return orderRepository.save(order);
+    private OrderHistoryResponse toHistoryResponse(Order order) {
+        return new OrderHistoryResponse(
+            order.getId(),
+            order.getBuyer() != null ? order.getBuyer().getId() : null,
+            order.getBuyer() != null ? order.getBuyer().getEmail() : null,
+            order.getProduct() != null ? order.getProduct().getId() : null,
+            order.getProduct() != null ? order.getProduct().getName() : null,
+            order.getProduct() != null ? order.getProduct().getPrice() : 0.0,
+            Math.max(order.getQuantity(), 1),
+            order.isPaid(),
+            order.getCreatedAt()
+        );
     }
 }

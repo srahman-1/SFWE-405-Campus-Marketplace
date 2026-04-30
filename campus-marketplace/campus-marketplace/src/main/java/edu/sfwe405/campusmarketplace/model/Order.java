@@ -13,6 +13,9 @@ public class Order {
 
     private boolean paid;
 
+    @Column(nullable = false)
+    private int quantity = 1;
+
     @ManyToOne
     private UserAccount buyer;
 
@@ -31,6 +34,14 @@ public class Order {
 
     public void setPaid(boolean paid) {
         this.paid = paid;
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
     }
 
     public UserAccount getBuyer() {

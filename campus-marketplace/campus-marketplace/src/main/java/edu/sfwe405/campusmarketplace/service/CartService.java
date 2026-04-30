@@ -141,7 +141,7 @@ public class CartService {
             Product product = productRepository.findById(item.getProductId()).get();
             inventoryService.decrementStock(product, item.getQuantity());
             productRepository.save(product);
-            orderIds.addAll(orderService.createPaidOrders(buyer, product, item.getQuantity()));
+            orderIds.add(orderService.createPaidOrder(buyer, product, item.getQuantity()));
         }
 
         cartItemRepository.deleteByBuyerId(buyerId);

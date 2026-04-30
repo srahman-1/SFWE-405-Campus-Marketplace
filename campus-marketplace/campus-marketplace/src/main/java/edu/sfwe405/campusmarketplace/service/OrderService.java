@@ -6,7 +6,6 @@ import edu.sfwe405.campusmarketplace.model.UserAccount;
 import edu.sfwe405.campusmarketplace.repository.OrderRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -22,15 +21,12 @@ public class OrderService {
         return orderRepository.findAll();
     }
 
-    public List<Long> createPaidOrders(UserAccount buyer, Product product, int quantity) {
-        List<Long> orderIds = new ArrayList<>();
-        for (int i = 0; i < quantity; i++) {
-            Order order = new Order();
-            order.setBuyer(buyer);
-            order.setProduct(product);
-            order.setPaid(true);
-            orderIds.add(orderRepository.save(order).getId());
-        }
-        return orderIds;
+    public Long createPaidOrder(UserAccount buyer, Product product, int quantity) {
+        Order order = new Order();
+        order.setBuyer(buyer);
+        order.setProduct(product);
+        order.setQuantity(quantity);
+        order.setPaid(true);
+        return orderRepository.save(order).getId();
     }
 }
