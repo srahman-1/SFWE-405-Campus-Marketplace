@@ -1,5 +1,13 @@
 package edu.sfwe405.campusmarketplace.service;
 
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
 import edu.sfwe405.campusmarketplace.dto.ForgotPasswordRequest;
 import edu.sfwe405.campusmarketplace.dto.ForgotPasswordResponse;
 import edu.sfwe405.campusmarketplace.dto.RegisterRequest;
@@ -9,13 +17,6 @@ import edu.sfwe405.campusmarketplace.dto.ResetPasswordResponse;
 import edu.sfwe405.campusmarketplace.dto.UpdateUserRequest;
 import edu.sfwe405.campusmarketplace.model.UserAccount;
 import edu.sfwe405.campusmarketplace.repository.UserRepository;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class UserService {
@@ -46,7 +47,6 @@ public class UserService {
         return new RegisterResponse(
                 user.getId(),
                 user.getEmail(),
-                user.getRole(),
                 user.getCreatedAt()
         );
     }
@@ -57,7 +57,6 @@ public class UserService {
                 .map(user -> new RegisterResponse(
                         user.getId(),
                         user.getEmail(),
-                        user.getRole(),
                         user.getCreatedAt()
                 ))
                 .toList();
