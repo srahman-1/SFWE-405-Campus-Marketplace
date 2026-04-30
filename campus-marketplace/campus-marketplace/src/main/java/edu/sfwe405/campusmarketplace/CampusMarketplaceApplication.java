@@ -28,7 +28,6 @@ public class CampusMarketplaceApplication {
                 UserAccount buyer = new UserAccount();
                 buyer.setEmail("buyer@arizona.edu");
                 buyer.setPassword(passwordEncoder.encode("Password1!"));
-                buyer.setRole(UserAccount.Role.CUSTOMER);
                 userRepository.save(buyer);
             }
 
@@ -36,7 +35,6 @@ public class CampusMarketplaceApplication {
                 UserAccount seller = new UserAccount();
                 seller.setEmail("seller@arizona.edu");
                 seller.setPassword(passwordEncoder.encode("Password1!"));
-                seller.setRole(UserAccount.Role.SELLER);
                 userRepository.save(seller);
             }
 

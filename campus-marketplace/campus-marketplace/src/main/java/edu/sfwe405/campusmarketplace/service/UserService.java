@@ -35,13 +35,12 @@ public class UserService {
 
         UserAccount user = new UserAccount();
         user.setEmail(cleanEmail);
-        user.setRole(request.role());
 
         String hashed = passwordEncoder.encode(request.password());
         user.setPassword(hashed);
 
         userRepository.save(user);
-        return new RegisterResponse(user.getId(), user.getEmail(), user.getRole(), user.getCreatedAt());
+        return new RegisterResponse(user.getId(), user.getEmail(), user.getCreatedAt());
     }
 
     public List<RegisterResponse> getAllUsers() {
@@ -50,7 +49,6 @@ public class UserService {
             .map(user -> new RegisterResponse(
                 user.getId(),
                 user.getEmail(),
-                user.getRole(),
                 user.getCreatedAt()
             ))
             .toList();

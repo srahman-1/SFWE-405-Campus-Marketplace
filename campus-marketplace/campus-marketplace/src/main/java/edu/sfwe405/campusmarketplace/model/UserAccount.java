@@ -17,14 +17,6 @@ public class UserAccount {
     @Column(nullable = false)
     private String password;
 
-    public enum Role {
-        CUSTOMER,
-        SELLER
-    }
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Role role;
-
     private LocalDateTime createdAt = LocalDateTime.now();
 
     public Long getId() {
@@ -49,14 +41,6 @@ public class UserAccount {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public Role getRole() {
-        return role;
-    }
-
-    public void setRole(Role role) {
-        this.role = role;
     }
 
     public LocalDateTime getCreatedAt() {

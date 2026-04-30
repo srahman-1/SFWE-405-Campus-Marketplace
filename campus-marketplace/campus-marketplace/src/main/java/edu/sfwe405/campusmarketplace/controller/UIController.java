@@ -6,6 +6,7 @@ import edu.sfwe405.campusmarketplace.model.UserAccount;
 import edu.sfwe405.campusmarketplace.repository.ProductRepository;
 import edu.sfwe405.campusmarketplace.repository.UserRepository;
 import edu.sfwe405.campusmarketplace.service.UserService;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -39,10 +40,9 @@ public class UIController {
     @PostMapping("/users")
     public String saveUser(
         @RequestParam String email,
-        @RequestParam String password,
-        @RequestParam UserAccount.Role role
+        @RequestParam String password
     ) {
-        userService.createUser(new RegisterRequest(email, password, role));
+        userService.createUser(new RegisterRequest(email, password));
         return "redirect:/ui/users";
     }
 
@@ -54,7 +54,9 @@ public class UIController {
     }
 
     @PostMapping("/products")
-    public String saveProduct(Product product) {
+    public String saveProduct(Product product, Authentication authentication) {
+        UserAccount owner = userService.getByEmailOrThrow(authentication.getName());
+        product.setOwner(owner);
         productRepo.save(product);
         return "redirect:/ui/products";
     }

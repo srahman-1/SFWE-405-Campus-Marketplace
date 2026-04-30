@@ -10,8 +10,6 @@ import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.function.Function;
 
 @Service
@@ -38,14 +36,10 @@ public class JwtService {
     }
 
     public String generateToken(UserAccount user) {
-        Map<String, Object> extraClaims = new HashMap<>();
-        extraClaims.put("role", "ROLE_" + user.getRole().name());
-
         Date now = new Date();
         Date expiration = new Date(now.getTime() + expirationMs);
 
         return Jwts.builder()
-            .claims(extraClaims)
             .subject(user.getEmail())
             .issuedAt(now)
             .expiration(expiration)
