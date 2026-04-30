@@ -1,6 +1,5 @@
 package edu.sfwe405.campusmarketplace.config;
 
-import edu.sfwe405.campusmarketplace.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -9,6 +8,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import edu.sfwe405.campusmarketplace.security.JwtAuthenticationFilter;
 
 @Configuration
 public class SecurityConfig {
@@ -30,17 +31,23 @@ public class SecurityConfig {
                 .requestMatchers("/auth/**", "/h2-console/**", "/error").permitAll()
                 .requestMatchers("/", "/index.html", "/**/*.html", "/**/*.js", "/**/*.css", "/**/*.png", "/**/*.jpg").permitAll()
                 .requestMatchers("/ui/**").authenticated()
+
                 .requestMatchers(HttpMethod.POST, "/users").permitAll()
                 .requestMatchers(HttpMethod.GET, "/users").authenticated()
+                .requestMatchers(HttpMethod.DELETE, "/users/me").authenticated()
+
                 .requestMatchers(HttpMethod.POST, "/products").authenticated()
                 .requestMatchers(HttpMethod.GET, "/products/me").authenticated()
-                .requestMatchers(HttpMethod.DELETE, "/users/me").authenticated()
+
+                .requestMatchers(HttpMethod.POST, "/reviews").authenticated()
+                .requestMatchers(HttpMethod.GET, "/reviews/**").permitAll()
+
                 .requestMatchers("/cart/**").authenticated()
                 .requestMatchers("/orders/**", "/payments/**").authenticated()
+
                 .anyRequest().permitAll()
             );
 
         return http.build();
     }
-
 }

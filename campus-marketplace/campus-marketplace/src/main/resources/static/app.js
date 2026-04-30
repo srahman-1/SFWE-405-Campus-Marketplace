@@ -8,7 +8,12 @@ let editingProductId = null
 let deletingProductId = null
 
 const onListingsPage =
-  window.location.pathname.endsWith('/listings.html') || window.location.pathname.endsWith('listings.html')
+  window.location.pathname.endsWith('/listings.html') ||
+  window.location.pathname.endsWith('listings.html') ||
+  window.location.pathname.endsWith('/index.html') ||
+  window.location.pathname.endsWith('index.html') ||
+
+  window.location.pathname === '/'
 const onOrdersPage =
   window.location.pathname.endsWith('/orders.html') || window.location.pathname.endsWith('orders.html')
 
@@ -304,19 +309,17 @@ function renderProducts(items) {
                 <strong>$${price}</strong>
                 <a class="btn btn-outline-primary btn-sm" href="listing.html?id=${item.id}">View item</a>
               </div>
-              ${
-                mine
-                  ? `
+              ${mine
+          ? `
                 <div class="d-flex gap-2 justify-content-end flex-wrap mt-3">
                   <button class="btn btn-outline-secondary btn-sm" type="button" data-edit-product="${item.id}">Edit</button>
                   <button class="btn btn-outline-danger btn-sm" type="button" data-delete-product="${item.id}">Delete</button>
                 </div>
               `
-                  : ''
-              }
-              ${
-                onListingsPage && signedIn
-                  ? `
+          : ''
+        }
+              ${onListingsPage && signedIn
+          ? `
                 <div class="d-flex align-items-center justify-content-end gap-2 flex-wrap mt-3">
                   <div class="d-inline-flex align-items-center border rounded ${available ? '' : 'opacity-50'}">
                     <button class="btn btn-light btn-sm border-0" type="button" data-qty-source="listing" data-product-id="${item.id}" data-stock="${item.stock}" data-qty-action="minus" ${available && quantity > 1 ? '' : 'disabled'}>-</button>
@@ -328,8 +331,8 @@ function renderProducts(items) {
                   </button>
                 </div>
               `
-                  : ''
-              }
+          : ''
+        }
             </div>
           </div>
         </div>
@@ -377,9 +380,8 @@ function renderMyListings(items) {
                 </span>
               </div>
             </div>
-            ${
-              mine
-                ? `
+            ${mine
+          ? `
               <div class="card-footer bg-white border-0 pt-0">
                 <div class="d-flex gap-2 justify-content-end flex-wrap">
                   <button class="btn btn-outline-secondary btn-sm" type="button" data-edit-product="${item.id}">Edit</button>
@@ -387,8 +389,8 @@ function renderMyListings(items) {
                 </div>
               </div>
             `
-                : ''
-            }
+          : ''
+        }
           </div>
         </div>
       `
@@ -725,9 +727,8 @@ function renderListingDetail(container, item) {
                   <div class="mb-3">
                     <span class="text-muted small">${available ? `${item.stock} available` : 'Sold out'}</span>
                   </div>
-                  ${
-                    signedIn
-                      ? `
+                  ${signedIn
+      ? `
                   <div class="d-flex justify-content-end mb-3">
                     <div class="d-inline-flex align-items-center border rounded ${available ? '' : 'opacity-50'}">
                       <button class="btn btn-light btn-sm border-0" type="button" data-qty-source="detail" data-product-id="${item.id}" data-stock="${item.stock}" data-qty-action="minus" ${available && quantity > 1 ? '' : 'disabled'}>-</button>
@@ -739,10 +740,10 @@ function renderListingDetail(container, item) {
                       Add ${available ? quantity : 0} to cart
                     </button>
                   `
-                      : `
+      : `
                     <a class="btn btn-primary w-100" href="login.html">Log in to add</a>
                   `
-                  }
+    }
                 </div>
               </div>
             </div>
@@ -750,6 +751,10 @@ function renderListingDetail(container, item) {
         </div>
       </div>
     `
+
+  container.insertAdjacentHTML('beforeend', '<div id="productReviews"></div>')
+  loadProductReviews(item.id)
+
   return container
 }
 
@@ -798,10 +803,10 @@ async function loadCart() {
               </thead>
               <tbody>
                 ${cartItems
-                  .map(item => {
-                    const stock = Number(stockById[String(item.productId)] || 0)
-                    const nextUp = item.quantity + 1
-                    return `
+        .map(item => {
+          const stock = Number(stockById[String(item.productId)] || 0)
+          const nextUp = item.quantity + 1
+          return `
                   <tr>
                     <td>
                       <div class="fw-semibold">${item.productName}</div>
@@ -821,8 +826,8 @@ async function loadCart() {
                     </td>
                   </tr>
                   `
-                  })
-                  .join('')}
+        })
+        .join('')}
               </tbody>
             </table>
           </div>
@@ -950,8 +955,8 @@ async function loadOrders() {
     container.innerHTML = `
       <div class="row g-3">
         ${orders
-          .map(
-            order => `
+        .map(
+          order => `
             <div class="col-12">
               <div class="card shadow-sm">
                 <div class="card-body">
@@ -961,35 +966,58 @@ async function loadOrders() {
                       <h2 class="h5 mb-1">${order.productName}</h2>
                       <div class="text-muted small">Placed ${formatDateTime(order.createdAt)}</div>
                     </div>
+
                     <span class="badge ${order.transactionType === 'SALE' ? 'text-bg-primary' : 'text-bg-success'}">
                       ${order.transactionType === 'SALE' ? 'Sale' : 'Purchase'}
                     </span>
                   </div>
+
                   <hr>
+
                   <div class="row g-3 small">
                     <div class="col-12 col-md-3">
                       <div class="text-muted">Product</div>
                       <div class="fw-semibold">#${order.productId}</div>
                     </div>
+
                     <div class="col-12 col-md-3">
                       <div class="text-muted">${order.transactionType === 'SALE' ? 'Sold to' : 'Buyer'}</div>
                       <div class="fw-semibold">${order.buyerEmail || 'Unknown buyer'}</div>
                     </div>
+
                     <div class="col-12 col-md-3">
                       <div class="text-muted">Quantity</div>
                       <div class="fw-semibold">${Number(order.quantity || 1)}</div>
                     </div>
+
                     <div class="col-12 col-md-3">
                       <div class="text-muted">Total</div>
                       <div class="fw-semibold">$${(Number(order.productPrice || 0) * Number(order.quantity || 1)).toFixed(2)}</div>
                     </div>
                   </div>
+
+                  ${order.transactionType !== 'SALE'
+              ? `
+                        <div class="mt-3 text-end">
+                          <button
+                            class="btn btn-outline-primary btn-sm"
+                            type="button"
+                            data-write-review
+                            data-product-id="${order.productId}"
+                            data-order-id="${order.orderId}"
+                            data-product-name="${order.productName || ''}">
+                            Write Review
+                          </button>
+                        </div>
+                      `
+              : ''
+            }
                 </div>
               </div>
             </div>
           `
-          )
-          .join('')}
+        )
+        .join('')}
       </div>
     `
   } catch (error) {
@@ -1090,10 +1118,141 @@ async function deleteCurrentAccount() {
   }
 }
 
+function openReviewModal(productId, orderId, productName) {
+  const modalElement = document.getElementById('reviewModal')
+  const productIdInput = document.getElementById('reviewProductId')
+  const orderIdInput = document.getElementById('reviewOrderId')
+  const productNameInput = document.getElementById('reviewProductName')
+  const ratingInput = document.getElementById('reviewRating')
+  const commentInput = document.getElementById('reviewComment')
+  const message = document.getElementById('reviewMessage')
+
+  if (!modalElement) return
+
+  productIdInput.value = productId
+  orderIdInput.value = orderId
+  productNameInput.value = productName || `Product #${productId}`
+  ratingInput.value = ''
+  commentInput.value = ''
+
+  if (message) {
+    message.textContent = ''
+    message.className = 'small text-muted mb-3'
+  }
+
+  const modal = new bootstrap.Modal(modalElement)
+  modal.show()
+}
+
+async function submitProductReview() {
+  const productId = Number(document.getElementById('reviewProductId')?.value || 0)
+  const orderId = Number(document.getElementById('reviewOrderId')?.value || 0)
+  const rating = Number(document.getElementById('reviewRating')?.value || 0)
+  const comment = document.getElementById('reviewComment')?.value.trim() || ''
+  const message = document.getElementById('reviewMessage')
+
+  if (!rating || rating < 1 || rating > 5) {
+    if (message) {
+      message.textContent = 'Please select a rating between 1 and 5.'
+      message.className = 'small text-danger mb-3'
+    }
+    return
+  }
+
+  if (comment.length > 500) {
+    if (message) {
+      message.textContent = 'Comment must be 500 characters or less.'
+      message.className = 'small text-danger mb-3'
+    }
+    return
+  }
+
+  try {
+    await request('/reviews', {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({
+        productId,
+        orderId,
+        rating,
+        comment,
+      }),
+    })
+
+    if (message) {
+      message.textContent = 'Review submitted successfully.'
+      message.className = 'small text-success mb-3'
+    }
+
+    showToast('Review submitted successfully.', 'success')
+
+    setTimeout(() => {
+      const modalElement = document.getElementById('reviewModal')
+      const modal = bootstrap.Modal.getInstance(modalElement)
+      if (modal) modal.hide()
+      loadOrders()
+    }, 700)
+  } catch (error) {
+    if (message) {
+      message.textContent = error.message || 'Could not submit review.'
+      message.className = 'small text-danger mb-3'
+    }
+  }
+}
+
+async function loadProductReviews(productId) {
+  const container = document.getElementById('productReviews')
+  if (!container) return
+
+  try {
+    const reviews = await request(`/reviews/product/${productId}`)
+
+    if (!reviews.length) {
+      container.innerHTML = `
+        <div class="card shadow-sm mt-4">
+          <div class="card-body">
+            <h2 class="h5 mb-2">Reviews</h2>
+            <p class="text-muted mb-0">No reviews yet.</p>
+          </div>
+        </div>
+      `
+      return
+    }
+
+    container.innerHTML = `
+      <div class="card shadow-sm mt-4">
+        <div class="card-body">
+          <h2 class="h5 mb-3">Reviews</h2>
+          <div class="vstack gap-3">
+        ${reviews
+        .map(review => `
+                <div class="border rounded p-3">
+                  <div class="d-flex justify-content-start align-items-center gap-3 flex-wrap">
+                    <div class="text-muted small">${review.reviewerEmail || 'Customer'}</div>
+                    <div class="fw-semibold">${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}</div>
+                  </div>
+                  <p class="mb-0 mt-2">${review.comment || 'No comment provided.'}</p>
+                </div>
+        `)
+        .join('')}
+          </div>
+        </div>
+      </div>
+    `
+  } catch (error) {
+    container.innerHTML = `
+      <div class="alert alert-danger mt-4">
+        Could not load reviews.
+      </div>
+    `
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('signupForm')?.addEventListener('submit', signUp)
   document.getElementById('loginForm')?.addEventListener('submit', signIn)
   document.getElementById('searchListings')?.addEventListener('input', filterProducts)
+  document.getElementById('submitReviewBtn')?.addEventListener('click', submitProductReview)
 
   // Settings menu buttons
   document.getElementById('settingsBtn')?.addEventListener('click', openSettingsModal)
@@ -1105,9 +1264,23 @@ document.addEventListener('DOMContentLoaded', () => {
   })
 
   document.addEventListener('click', event => {
+    const reviewButton = event.target.closest('[data-write-review]')
+    if (reviewButton) {
+      openReviewModal(
+        reviewButton.dataset.productId,
+        reviewButton.dataset.orderId,
+        reviewButton.dataset.productName
+      )
+      return
+    }
+
     const addButton = event.target.closest('[data-add-to-cart]')
     if (addButton) {
-      addToCart(addButton.dataset.addToCart, addButton.dataset.quantity, addButton.dataset.stock)
+      addToCart(
+        addButton.dataset.addToCart,
+        addButton.dataset.quantity,
+        addButton.dataset.stock
+      )
       return
     }
 
@@ -1133,11 +1306,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (source === 'listing') {
       const current = listingQuantity(productId, stock)
+
       if (action === 'plus') {
         listingSelections[productId] = determineCartQtyChange(current + 1, stock)
       } else {
         listingSelections[productId] = determineCartQtyChange(current - 1, stock)
       }
+
       filterProducts()
       return
     }
@@ -1148,12 +1323,14 @@ document.addEventListener('DOMContentLoaded', () => {
       } else {
         listingDetailQuantity = determineCartQtyChange(listingDetailQuantity - 1, stock)
       }
+
       renderListingDetail(document.getElementById('listingDetail'), listingDetail)
     }
   })
 
   const email = new URLSearchParams(window.location.search).get('email')
   const loginEmail = document.getElementById('loginEmail')
+
   if (email && loginEmail) {
     loginEmail.value = email
   }
