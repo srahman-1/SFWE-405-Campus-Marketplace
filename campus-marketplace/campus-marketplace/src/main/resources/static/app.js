@@ -995,10 +995,108 @@ async function loadOrders() {
   }
 }
 
+function openSettingsModal() {
+  const modalElement = document.getElementById('settingsModal')
+  const emailInput = document.getElementById('settingsEmail')
+  const passwordInput = document.getElementById('settingsPassword')
+  const message = document.getElementById('settingsMessage')
+
+  if (!modalElement) return
+
+  if (emailInput) {
+    emailInput.value = localStorage.getItem('campus_marketplace_email') || ''
+  }
+
+  if (passwordInput) {
+    passwordInput.value = ''
+  }
+
+  if (message) {
+    message.textContent = ''
+    message.className = 'mt-3 text-muted small'
+  }
+
+  const modal = new bootstrap.Modal(modalElement)
+  modal.show()
+}
+
+async function saveAccountSettings() {
+  const email = document.getElementById('settingsEmail')?.value.trim().toLowerCase() || ''
+  const password = document.getElementById('settingsPassword')?.value || ''
+  const message = document.getElementById('settingsMessage')
+
+  if (!email && !password) {
+    if (message) {
+      message.textContent = 'Enter a new email or password.'
+      message.className = 'mt-3 text-warning small'
+    }
+    return
+  }
+
+  try {
+    const updated = await request('/users/me', {
+      method: 'PUT',
+      headers: authHeaders(),
+      body: JSON.stringify({ email, password }),
+    })
+
+    if (updated && updated.email) {
+      localStorage.setItem('campus_marketplace_email', updated.email)
+    } else if (email) {
+      localStorage.setItem('campus_marketplace_email', email)
+    }
+
+    updateNav()
+
+    if (message) {
+      message.textContent = 'Account updated successfully.'
+      message.className = 'mt-3 text-success small'
+    }
+
+    showToast('Account settings updated.', 'success')
+  } catch (error) {
+    if (message) {
+      message.textContent = error.message || 'Could not update account.'
+      message.className = 'mt-3 text-danger small'
+    }
+  }
+}
+
+async function deleteCurrentAccount() {
+  const confirmed = confirm('Are you sure you want to delete your account? This cannot be undone.')
+
+  if (!confirmed) {
+    return
+  }
+
+  try {
+    await request('/users/me', {
+      method: 'DELETE',
+      headers: authHeaders(),
+    })
+
+    alert('Your account has been deleted.')
+
+    localStorage.removeItem('campus_marketplace_token')
+    localStorage.removeItem('campus_marketplace_email')
+    localStorage.removeItem('campus_marketplace_role')
+    localStorage.removeItem('campus_marketplace_user_id')
+
+    window.location.href = 'signup.html'
+  } catch (error) {
+    showToast(error.message || 'Could not delete account.', 'danger')
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('signupForm')?.addEventListener('submit', signUp)
   document.getElementById('loginForm')?.addEventListener('submit', signIn)
   document.getElementById('searchListings')?.addEventListener('input', filterProducts)
+
+  // Settings menu buttons
+  document.getElementById('settingsBtn')?.addEventListener('click', openSettingsModal)
+  document.getElementById('saveSettingsBtn')?.addEventListener('click', saveAccountSettings)
+  document.getElementById('deleteAccountBtn')?.addEventListener('click', deleteCurrentAccount)
 
   document.querySelectorAll("[data-action='logout']").forEach(el => {
     el.addEventListener('click', logout)

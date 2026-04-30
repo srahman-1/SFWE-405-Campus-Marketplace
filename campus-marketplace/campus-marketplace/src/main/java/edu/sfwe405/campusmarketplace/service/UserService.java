@@ -6,6 +6,7 @@ import edu.sfwe405.campusmarketplace.dto.RegisterRequest;
 import edu.sfwe405.campusmarketplace.dto.RegisterResponse;
 import edu.sfwe405.campusmarketplace.dto.ResetPasswordRequest;
 import edu.sfwe405.campusmarketplace.dto.ResetPasswordResponse;
+import edu.sfwe405.campusmarketplace.dto.UpdateUserRequest;
 import edu.sfwe405.campusmarketplace.model.UserAccount;
 import edu.sfwe405.campusmarketplace.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -29,6 +30,7 @@ public class UserService {
 
     public RegisterResponse createUser(RegisterRequest request) {
         String cleanEmail = request.email().trim().toLowerCase();
+
         if (userRepository.findByEmail(cleanEmail).isPresent()) {
             throw new IllegalArgumentException("Email is already registered");
         }
@@ -40,24 +42,32 @@ public class UserService {
         user.setPassword(hashed);
 
         userRepository.save(user);
-        return new RegisterResponse(user.getId(), user.getEmail(), user.getCreatedAt());
+
+        return new RegisterResponse(
+                user.getId(),
+                user.getEmail(),
+                user.getRole(),
+                user.getCreatedAt()
+        );
     }
 
     public List<RegisterResponse> getAllUsers() {
         return userRepository.findAll()
-            .stream()
-            .map(user -> new RegisterResponse(
-                user.getId(),
-                user.getEmail(),
-                user.getCreatedAt()
-            ))
-            .toList();
+                .stream()
+                .map(user -> new RegisterResponse(
+                        user.getId(),
+                        user.getEmail(),
+                        user.getRole(),
+                        user.getCreatedAt()
+                ))
+                .toList();
     }
 
     public UserAccount getByEmailOrThrow(String email) {
         String cleanEmail = email.trim().toLowerCase();
+
         return userRepository.findByEmail(cleanEmail)
-            .orElseThrow(() -> new IllegalArgumentException("Invalid credentials"));
+                .orElseThrow(() -> new IllegalArgumentException("Invalid credentials"));
     }
 
     public void updatePassword(String email, String newPassword) {
@@ -75,13 +85,39 @@ public class UserService {
         userRepository.delete(user);
     }
 
+    public String updateAccount(String currentEmail, UpdateUserRequest request) {
+        UserAccount user = getByEmailOrThrow(currentEmail);
+
+        if (request.email() != null && !request.email().isBlank()) {
+            String cleanEmail = request.email().trim().toLowerCase();
+
+            if (!cleanEmail.equals(user.getEmail())
+                    && userRepository.findByEmail(cleanEmail).isPresent()) {
+                throw new IllegalArgumentException("Email is already registered.");
+            }
+
+            user.setEmail(cleanEmail);
+        }
+
+        if (request.password() != null && !request.password().isBlank()) {
+            user.setPassword(passwordEncoder.encode(request.password()));
+        }
+
+        userRepository.save(user);
+
+        return user.getEmail();
+    }
+
     private final Map<String, String> tokenStore = new ConcurrentHashMap<>();
 
     public ForgotPasswordResponse requestReset(ForgotPasswordRequest request) {
         String cleanEmail = request.email().trim().toLowerCase();
+
         getByEmailOrThrow(cleanEmail);
+
         String token = UUID.randomUUID().toString();
         tokenStore.put(token, cleanEmail);
+
         return new ForgotPasswordResponse("Password reset token generated.", token);
     }
 
@@ -94,6 +130,7 @@ public class UserService {
 
         updatePassword(email, request.newPassword());
         tokenStore.remove(request.resetToken());
+
         return new ResetPasswordResponse("Password has been reset successfully.");
     }
 }
