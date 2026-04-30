@@ -11,7 +11,9 @@
 
 <main class="container py-4">
     <h1 class="h3 mb-4">Admin Panel</h1>
-
+    <div class="mb-3">
+        <button class="btn btn-primary" onclick="openUserAccountsModal()">View User Accounts</button>
+    </div>
     <div id="adminMessage" class="alert d-none"></div>
 
     <div class="card">
@@ -41,6 +43,38 @@
     </div>
 </main>
 
+<!-- User Accounts Modal -->
+<div class="modal fade" id="userAccountsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">User Accounts (Role: User)</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="userAccountsAlert" class="alert d-none"></div>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>User ID</th>
+                                <th>Email</th>
+                                <th>Password (Hashed)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userAccountsTableBody">
+                            <tr><td colspan="3" class="text-center text-muted">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>    
+    
 <!-- Edit User Modal -->
 <div class="modal fade" id="editUserModal" tabindex="-1">
     <div class="modal-dialog">
