@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 public record OrderHistoryResponse(
     Long orderId,
+    String transactionType,
     Long buyerId,
     String buyerEmail,
     Long productId,

@@ -28,15 +28,22 @@ public class OrderController {
     @GetMapping("/me")
     public List<OrderHistoryResponse> getMyOrders(Authentication authentication) {
         UserAccount user = userService.getByEmailOrThrow(authentication.getName());
-        return orderRepository.findByBuyer_IdAndPaidTrueOrderByCreatedAtDesc(user.getId())
+        return orderRepository.findDistinctByBuyer_IdOrProduct_Owner_IdOrderByCreatedAtDesc(user.getId(), user.getId())
             .stream()
             .map(this::toHistoryResponse)
             .toList();
     }
 
     private OrderHistoryResponse toHistoryResponse(Order order) {
+        boolean isSale = order.getProduct() != null
+            && order.getProduct().getOwner() != null
+            && order.getBuyer() != null
+            && order.getProduct().getOwner().getId() != null
+            && order.getProduct().getOwner().getId().equals(order.getBuyer().getId()) == false;
+
         return new OrderHistoryResponse(
             order.getId(),
+            isSale ? "SALE" : "PURCHASE",
             order.getBuyer() != null ? order.getBuyer().getId() : null,
             order.getBuyer() != null ? order.getBuyer().getEmail() : null,
             order.getProduct() != null ? order.getProduct().getId() : null,

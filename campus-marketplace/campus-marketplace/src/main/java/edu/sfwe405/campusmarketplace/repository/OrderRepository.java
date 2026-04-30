@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 //Order repository for marketplace system (extends jpa repository).
 public interface OrderRepository extends JpaRepository<Order, Long> {
-    List<Order> findByBuyer_IdAndPaidTrueOrderByCreatedAtDesc(Long buyerId);
+    List<Order> findDistinctByBuyer_IdOrProduct_Owner_IdOrderByCreatedAtDesc(Long buyerId, Long ownerId);
 }
