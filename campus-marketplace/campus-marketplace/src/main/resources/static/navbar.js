@@ -1,11 +1,11 @@
 function loadNavbar() {
-    const isAdmin = localStorage.getItem('campus_marketplace_role') === 'admin'
-    const navbarHTML = `
+  const isAdmin = localStorage.getItem('campus_marketplace_role') === 'admin'
+  const navbarHTML = `
   <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
-    <div class="container">
+    <div class="container d-flex align-items-center">
       <a class="navbar-brand" href="index.html">Campus Marketplace</a>
 
-      <div class="d-flex gap-2">
+      <div class="d-flex gap-2 ms-auto">
         <a class="btn btn-outline-primary btn-sm" data-auth="signed-out" href="login.html">Log In</a>
         <a class="btn btn-primary btn-sm" data-auth="signed-out" href="signup.html">Sign Up</a>
 
@@ -23,7 +23,7 @@ function loadNavbar() {
     </div>
   </nav>`
 
-    document.getElementById('navbar-container').innerHTML = navbarHTML
+  document.getElementById('navbar-container').innerHTML = navbarHTML
 }
 
 document.addEventListener('DOMContentLoaded', loadNavbar)
