@@ -5,6 +5,8 @@ let listingDetail = null
 let listingDetailQuantity = 1
 const onListingsPage =
   window.location.pathname.endsWith('/listings.html') || window.location.pathname.endsWith('listings.html')
+const onOrdersPage =
+  window.location.pathname.endsWith('/orders.html') || window.location.pathname.endsWith('orders.html')
 
 function request(url, options = {}) {
   const headers = { ...(options.headers || {}) }
@@ -134,6 +136,12 @@ function updateNav() {
       ? `Signed in as ${localStorage.getItem('campus_marketplace_email')}`
       : 'Browse the marketplace or create an account.'
   }
+}
+
+function formatDateTime(value) {
+  if (!value) return 'Unknown date'
+  const date = new Date(value)
+  return Number.isNaN(date.getTime()) ? String(value) : date.toLocaleString()
 }
 
 function updateCartCount() {
@@ -526,7 +534,10 @@ async function loadCart() {
             <div class="text-muted small">Cart total</div>
             <div class="h4 mb-0">$${Number(cart.total || 0).toFixed(2)}</div>
           </div>
-          <a class="btn btn-primary" href="index.html">Keep shopping</a>
+          <div class="d-flex gap-2 flex-wrap justify-content-end">
+            <button class="btn btn-primary" type="button" data-checkout-cart>Checkout</button>
+            <a class="btn btn-outline-secondary" href="index.html">Keep shopping</a>
+          </div>
         </div>
       </div>
     `
@@ -577,6 +588,108 @@ async function loadCart() {
         }
       })
     })
+
+    document.querySelectorAll('[data-checkout-cart]').forEach(button => {
+      button.addEventListener('click', async () => {
+        try {
+          const response = await request(`/cart/${buyerId}/checkout`, {
+            method: 'POST',
+            headers: authHeaders(),
+            body: JSON.stringify({
+              paymentMethod: 'Card',
+              forcePaymentFailure: false,
+            }),
+          })
+
+          if (!response.success) {
+            showToast(response.message || 'Checkout failed.', 'danger')
+            return
+          }
+
+          updateCartCount()
+          showToast('Purchase successful. Opening your orders...', 'success')
+          setTimeout(() => {
+            window.location.href = 'orders.html'
+          }, 500)
+        } catch (error) {
+          showToast(error.message, 'danger')
+        }
+      })
+    })
+  } catch (error) {
+    container.innerHTML = `<div class="alert alert-danger">${error.message}</div>`
+  }
+}
+
+async function loadOrders() {
+  const container = document.getElementById('ordersContent')
+  if (!container) return
+
+  if (!localStorage.getItem('campus_marketplace_token')) {
+    container.innerHTML = `
+      <div class="alert alert-info">
+        Please <a href="login.html" class="alert-link">log in</a> to view your order history.
+      </div>
+    `
+    return
+  }
+
+  try {
+    const orders = await request('/orders/me', { headers: authHeaders() })
+
+    if (!orders.length) {
+      container.innerHTML = `
+        <div class="alert alert-light border">
+          You have not placed any orders yet.
+          <a class="alert-link" href="index.html">Start shopping</a>.
+        </div>
+      `
+      return
+    }
+
+    container.innerHTML = `
+      <div class="row g-3">
+        ${orders
+          .map(order => `
+            <div class="col-12">
+              <div class="card shadow-sm">
+                <div class="card-body">
+                  <div class="d-flex flex-wrap justify-content-between gap-3 align-items-start">
+                    <div>
+                      <div class="text-muted small">Order #${order.orderId}</div>
+                      <h2 class="h5 mb-1">${order.productName}</h2>
+                      <div class="text-muted small">Placed ${formatDateTime(order.createdAt)}</div>
+                    </div>
+                    <span class="badge ${order.paid ? 'text-bg-success' : 'text-bg-secondary'}">
+                      ${order.paid ? 'Paid' : 'Pending'}
+                    </span>
+                  </div>
+                  <hr>
+                  <div class="row g-3 small">
+                    <div class="col-12 col-md-3">
+                      <div class="text-muted">Product</div>
+                      <div class="fw-semibold">#${order.productId}</div>
+                    </div>
+                    <div class="col-12 col-md-3">
+                      <div class="text-muted">Buyer</div>
+                      <div class="fw-semibold">${order.buyerEmail || 'Unknown buyer'}</div>
+                    </div>
+                    <div class="col-12 col-md-3">
+                      <div class="text-muted">Quantity</div>
+                      <div class="fw-semibold">${Number(order.quantity || 1)}</div>
+                    </div>
+                    <div class="col-12 col-md-3">
+                      <div class="text-muted">Total</div>
+                      <div class="fw-semibold">$${(Number(order.productPrice || 0) * Number(order.quantity || 1)).toFixed(2)}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `)
+          .join('')}
+      </div>
+    `
   } catch (error) {
     container.innerHTML = `<div class="alert alert-danger">${error.message}</div>`
   }
@@ -646,5 +759,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (document.getElementById('cartContent')) {
     loadCart().then(updateCartCount)
+  }
+
+  if (onOrdersPage) {
+    loadOrders()
   }
 })
