@@ -82,6 +82,24 @@ public class CartService {
         return viewCart(buyerId);
     }
 
+    public CartResponse updateItemQuantity(Long buyerId, Long productId, int quantity) {
+        getBuyerOrThrow(buyerId);
+        productRepository.findById(productId)
+            .orElseThrow(() -> new IllegalArgumentException("Product not found"));
+
+        if (quantity <= 0) {
+            cartItemRepository.deleteByBuyerIdAndProductId(buyerId, productId);
+            return viewCart(buyerId);
+        }
+
+        CartItem item = cartItemRepository.findByBuyerIdAndProductId(buyerId, productId)
+            .orElse(new CartItem(buyerId, productId, quantity));
+        item.setQuantity(quantity);
+        cartItemRepository.save(item);
+
+        return viewCart(buyerId);
+    }
+
     @Transactional
     public CartCheckoutResponse checkout(Long buyerId, CartCheckoutRequest request) {
         UserAccount buyer = getBuyerOrThrow(buyerId);

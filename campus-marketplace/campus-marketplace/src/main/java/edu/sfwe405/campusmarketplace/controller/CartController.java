@@ -36,6 +36,15 @@ public class CartController {
         return cartService.removeItem(buyerId, productId);
     }
 
+    @PutMapping("/{buyerId}/items/{productId}")
+    public CartResponse updateItemQuantity(
+        @PathVariable Long buyerId,
+        @PathVariable Long productId,
+        @RequestParam int quantity
+    ) {
+        return cartService.updateItemQuantity(buyerId, productId, quantity);
+    }
+
     @PostMapping("/{buyerId}/checkout")
     public CartCheckoutResponse checkout(
         @PathVariable Long buyerId,
