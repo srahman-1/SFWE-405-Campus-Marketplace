@@ -13,6 +13,10 @@
       <div class="d-flex gap-2">
         <a class="btn btn-outline-primary btn-sm" data-auth="signed-out" href="login.html">Log In</a>
         <a class="btn btn-primary btn-sm" data-auth="signed-out" href="signup.html">Sign Up</a>
+        <a class="btn btn-outline-primary btn-sm position-relative d-none" data-auth="signed-in" href="/cart.html">
+          Cart
+          <span id="cartCount" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none">0</span>
+        </a>
         <button class="btn btn-outline-secondary btn-sm d-none" data-auth="signed-in" data-action="logout" type="button">Log Out</button>
       </div>
     </div>
