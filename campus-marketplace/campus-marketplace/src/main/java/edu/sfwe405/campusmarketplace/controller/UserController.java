@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import edu.sfwe405.campusmarketplace.dto.RegisterRequest;
 import edu.sfwe405.campusmarketplace.dto.RegisterResponse;
@@ -70,6 +71,61 @@ public class UserController {
 
             return ResponseEntity.internalServerError().body(Map.of(
                     "message", error.getClass().getSimpleName() + ": " + error.getMessage()
+            ));
+        }
+
+
+    }
+    @PutMapping("/{id}/role")
+    public ResponseEntity<Map<String, String>> updateUserRole(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> request,
+            Authentication authentication) {
+
+        try {
+            // Check if current user is admin
+            String currentEmail = authentication.getName();
+            if (!userService.isAdmin(currentEmail)) {
+                return ResponseEntity.status(403).body(Map.of(
+                        "message", "Forbidden: Admin access required"
+                ));
+            }
+
+            String newRole = request.get("role");
+            userService.updateUserRole(id, newRole);
+
+            return ResponseEntity.ok(Map.of(
+                    "message", "User role updated successfully"
+            ));
+        } catch (Exception error) {
+            return ResponseEntity.internalServerError().body(Map.of(
+                    "message", error.getMessage()
+            ));
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Map<String, String>> deleteUser(
+            @PathVariable Long id,
+            Authentication authentication) {
+
+        try {
+            // Check if current user is admin
+            String currentEmail = authentication.getName();
+            if (!userService.isAdmin(currentEmail)) {
+                return ResponseEntity.status(403).body(Map.of(
+                        "message", "Forbidden: Admin access required"
+                ));
+            }
+
+            userService.deleteUserById(id);
+
+            return ResponseEntity.ok(Map.of(
+                    "message", "User deleted successfully"
+            ));
+        } catch (Exception error) {
+            return ResponseEntity.internalServerError().body(Map.of(
+                    "message", error.getMessage()
             ));
         }
     }

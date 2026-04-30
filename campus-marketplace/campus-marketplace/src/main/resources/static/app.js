@@ -184,6 +184,7 @@ function logout() {
   localStorage.removeItem('campus_marketplace_token')
   localStorage.removeItem('campus_marketplace_email')
   localStorage.removeItem('campus_marketplace_user_id')
+  localStorage.removeItem('campus_marketplace_role')
   window.location.href = 'index.html'
 }
 
@@ -246,6 +247,7 @@ async function signIn(event) {
     localStorage.setItem('campus_marketplace_token', data.token)
     localStorage.setItem('campus_marketplace_email', data.email)
     localStorage.setItem('campus_marketplace_user_id', data.id)
+    localStorage.setItem('campus_marketplace_role', data.role)
     showAlert('loginAlert', 'Logged in. Redirecting...', 'success')
 
     updateNav()

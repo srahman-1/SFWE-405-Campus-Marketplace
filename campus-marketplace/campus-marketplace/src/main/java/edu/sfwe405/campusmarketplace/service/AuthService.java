@@ -29,12 +29,8 @@ public class AuthService {
 
         String token = jwtService.generateToken(user);
 
-        return new LoginResponse(
-            token,
-            jwtService.getTokenExpirationInSeconds(),
-            user.getEmail(),
-            user.getId()
-        );
+        long expiresInSeconds = jwtService.getTokenExpirationInSeconds();
+        return new LoginResponse(token, expiresInSeconds, user.getEmail(), user.getId(), user.getRole());
     }
 
     public boolean userExists(String email) {

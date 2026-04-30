@@ -10,6 +10,7 @@ import edu.sfwe405.campusmarketplace.dto.UpdateUserRequest;
 import edu.sfwe405.campusmarketplace.model.UserAccount;
 import edu.sfwe405.campusmarketplace.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -41,26 +42,15 @@ public class UserService {
         String hashed = passwordEncoder.encode(request.password());
         user.setPassword(hashed);
 
-        userRepository.save(user);
+        UserAccount savedUser = userRepository.save(user);
 
-        return new RegisterResponse(
-                user.getId(),
-                user.getEmail(),
-                user.getRole(),
-                user.getCreatedAt()
-        );
+        return new RegisterResponse(savedUser.getId(), savedUser.getEmail(), savedUser.getRole(), savedUser.getCreatedAt());
     }
 
     public List<RegisterResponse> getAllUsers() {
-        return userRepository.findAll()
-                .stream()
-                .map(user -> new RegisterResponse(
-                        user.getId(),
-                        user.getEmail(),
-                        user.getRole(),
-                        user.getCreatedAt()
-                ))
-                .toList();
+        return userRepository.findAll().stream()
+                .map(u -> new RegisterResponse(u.getId(), u.getEmail(), u.getRole(), u.getCreatedAt()))
+                .collect(Collectors.toList());
     }
 
     public UserAccount getByEmailOrThrow(String email) {
@@ -132,5 +122,21 @@ public class UserService {
         tokenStore.remove(request.resetToken());
 
         return new ResetPasswordResponse("Password has been reset successfully.");
+    }
+    public boolean isAdmin(String email) {
+        UserAccount user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        return "admin".equals(user.getRole());
+    }
+
+    public void updateUserRole(Long userId, String newRole) {
+        UserAccount user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        user.setRole(newRole);
+        userRepository.save(user);
+    }
+
+    public void deleteUserById(Long userId) {
+        userRepository.deleteById(userId);
     }
 }

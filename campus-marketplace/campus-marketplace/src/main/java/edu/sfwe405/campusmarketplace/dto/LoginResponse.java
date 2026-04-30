@@ -4,5 +4,6 @@ public record LoginResponse(
     String token,
     long expiresInSeconds,
     String email,
-    Long id
+    Long id,
+    String role
 ) {}
