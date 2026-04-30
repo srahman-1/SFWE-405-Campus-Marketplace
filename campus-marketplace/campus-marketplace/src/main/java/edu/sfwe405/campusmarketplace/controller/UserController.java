@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import edu.sfwe405.campusmarketplace.dto.RegisterRequest;
 import edu.sfwe405.campusmarketplace.dto.RegisterResponse;
 import edu.sfwe405.campusmarketplace.dto.UpdateUserRequest;
+import edu.sfwe405.campusmarketplace.dto.UserAccountDetail;
 import edu.sfwe405.campusmarketplace.service.UserService;
 import jakarta.validation.Valid;
 
@@ -103,7 +104,26 @@ public class UserController {
             ));
         }
     }
-
+    @GetMapping("/role/{role}")
+    public ResponseEntity<?> getUsersByRole(
+            @PathVariable String role,
+            Authentication authentication) {
+        try {
+            String currentEmail = authentication.getName();
+            if (!userService.isAdmin(currentEmail)) {
+                return ResponseEntity.status(403).body(Map.of(
+                        "message", "Forbidden: Admin access required"
+                ));
+            }
+            List<UserAccountDetail> users = userService.getUsersByRole(role);
+            return ResponseEntity.ok(users);
+        } catch (Exception error) {
+            return ResponseEntity.internalServerError().body(Map.of(
+                    "message", error.getMessage()
+            ));
+        }
+    }
+    
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, String>> deleteUser(
             @PathVariable Long id,
