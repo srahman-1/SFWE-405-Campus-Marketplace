@@ -868,6 +868,8 @@ async function loadCart() {
         const productId = button.dataset.cartChange
         const stock = Number(button.dataset.cartStock || 0)
 
+        if (nextQuantity < 1) return
+
         if (stock > 0 && nextQuantity > stock) {
           showToast('That is all the stock that is left.', 'warning')
           return

@@ -77,6 +77,7 @@ public class CartService {
         return new CartResponse(buyerId, items, total);
     }
 
+    @Transactional
     public CartResponse removeItem(Long buyerId, Long productId) {
         cartItemRepository.deleteByBuyerIdAndProductId(buyerId, productId);
         return viewCart(buyerId);

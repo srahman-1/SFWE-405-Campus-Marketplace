@@ -30,16 +30,15 @@ public class OrderController {
         UserAccount user = userService.getByEmailOrThrow(authentication.getName());
         return orderRepository.findDistinctByBuyer_IdOrProduct_Owner_IdOrderByCreatedAtDesc(user.getId(), user.getId())
             .stream()
-            .map(this::toHistoryResponse)
+            .map(order -> toHistoryResponse(order, user))
             .toList();
     }
 
-    private OrderHistoryResponse toHistoryResponse(Order order) {
+    private OrderHistoryResponse toHistoryResponse(Order order, UserAccount currentUser) {
         boolean isSale = order.getProduct() != null
             && order.getProduct().getOwner() != null
-            && order.getBuyer() != null
             && order.getProduct().getOwner().getId() != null
-            && order.getProduct().getOwner().getId().equals(order.getBuyer().getId()) == false;
+            && order.getProduct().getOwner().getId().equals(currentUser.getId());
 
         return new OrderHistoryResponse(
             order.getId(),
